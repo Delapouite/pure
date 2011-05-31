@@ -114,7 +114,7 @@ $p.core = function(sel, ctxt, plugins){
 	}
 
 	// returns the string generator function
-	function wrapquote(qfn, f){
+	function wrapQuote(qfn, f){
 		return function(ctxt){
 			return qfn('' + f.call(ctxt.item || ctxt.context, ctxt));
 		};
@@ -235,7 +235,7 @@ $p.core = function(sel, ctxt, plugins){
 	}
 
 	// wrap in an object the target node/attr and their properties
-	function gettarget(dom, sel, isloop){
+	function getTarget(dom, sel, isLoop){
 		var osel, prepend, selector, attr, append, target = [];
 		if( typeof sel === 'string' ){
 			osel = sel;
@@ -268,9 +268,9 @@ $p.core = function(sel, ctxt, plugins){
 		if( prepend || append ){
 			if( prepend && append ){
 				error('append/prepend cannot take place at the same time');
-			}else if( isloop ){
+			}else if( isLoop ){
 				error('no append/prepend/replace modifiers allowed for loop target');
-			}else if( append && isloop ){
+			}else if( append && isLoop ){
 				error('cannot append with loop (sel: ' + osel + ')');
 			}
 		}
@@ -307,7 +307,7 @@ $p.core = function(sel, ctxt, plugins){
 				setfn = function(node, s){ setstr( node, s ); };
 			}
 		}else{
-			if (isloop) {
+			if (isLoop) {
 				setfn = function(node, s) {
 					var pn = node.parentNode;
 					if (pn) {
@@ -333,7 +333,7 @@ $p.core = function(sel, ctxt, plugins){
 		return { attr: attr, nodes: target, set: setfn, sel: osel, quotefn: quotefn };
 	}
 
-	function setsig(target, n){
+	function setSig(target, n){
 		var sig = Sig + n + ':';
 		for(var i = 0; i < target.nodes.length; i++){
 			// could check for overlapping targets here.
@@ -427,15 +427,15 @@ $p.core = function(sel, ctxt, plugins){
 		}
 		var spec = parseloopspec(ls),
 			itersel = dataselectfn(spec.sel),
-			target = gettarget(dom, sel, true),
+			target = getTarget(dom, sel, true),
 			nodes = target.nodes;
 
 		for(i = 0; i < nodes.length; i++){
 			var node = nodes[i],
 				inner = compiler(node, dsel);
-			fns[fns.length] = wrapquote(target.quotefn, loopfn(spec.name, itersel, inner, sorter, filter));
+			fns[fns.length] = wrapQuote(target.quotefn, loopfn(spec.name, itersel, inner, sorter, filter));
 			target.nodes = [node];		// N.B. side effect on target.
-			setsig(target, fns.length - 1);
+			setSig(target, fns.length - 1);
 		}
 		return target;
 	}
@@ -529,20 +529,20 @@ $p.core = function(sel, ctxt, plugins){
 				ans.splice(0, 1);
 				if(cspec.t === 'str'){
 					// if the target is a value
-					target = gettarget(n, cspec, false);
-					setsig(target, fns.length);
-					fns[fns.length] = wrapquote(target.quotefn, dataselectfn(cspec.prop));
+					target = getTarget(n, cspec, false);
+					setSig(target, fns.length);
+					fns[fns.length] = wrapQuote(target.quotefn, dataselectfn(cspec.prop));
 				}else{
 					// if the target is a loop
 					itersel = dataselectfn(cspec.sel);
-					target = gettarget(n, cspec, true);
+					target = getTarget(n, cspec, true);
 					nodes = target.nodes;
 					for(j = 0, jj = nodes.length; j < jj; j++){
 						node = nodes[j];
 						inner = compiler(node, false, data, ans);
-						fns[fns.length] = wrapquote(target.quotefn, loopfn(cspec.sel, itersel, inner));
+						fns[fns.length] = wrapQuote(target.quotefn, loopfn(cspec.sel, itersel, inner));
 						target.nodes = [node];
-						setsig(target, fns.length - 1);
+						setSig(target, fns.length - 1);
 					}
 				}
 			}
@@ -558,9 +558,9 @@ $p.core = function(sel, ctxt, plugins){
 					if(typeof(dsel) === 'function' || typeof(dsel) === 'string'){
 						// set the value for the node/attr
 						sel = sels[i];
-						target = gettarget(dom, sel, false);
-						setsig(target, fns.length);
-						fns[fns.length] = wrapquote(target.quotefn, dataselectfn(dsel));
+						target = getTarget(dom, sel, false);
+						setSig(target, fns.length);
+						fns[fns.length] = wrapQuote(target.quotefn, dataselectfn(dsel));
 					}else{
 						// loop on node
 						loopgen(dom, sel, dsel, fns);
@@ -582,7 +582,7 @@ $p.core = function(sel, ctxt, plugins){
 		// for each slice add the return string of
 		for(i = 1; i < parts.length; i++){
 			p = parts[i];
-			// part is of the form "fn-number:..." as placed there by setsig.
+			// part is of the form "fn-number:..." as placed there by setSig.
 			pfns[i] = fns[ parseInt(p, 10) ];
 			parts[i] = p.substring( p.indexOf(':') + 1 );
 		}
