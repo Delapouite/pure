@@ -114,9 +114,9 @@ $p.core = function(sel, ctxt, plugins){
 	}
 
 	// returns the string generator function
-	function wrapQuote(qfn, f){
+	function wrapQuote(quoteFn, fn){
 		return function(ctxt){
-			return qfn('' + f.call(ctxt.item || ctxt.context, ctxt));
+			return quoteFn('' + fn.call(ctxt.item || ctxt.context, ctxt));
 		};
 	}
 
@@ -182,7 +182,7 @@ $p.core = function(sel, ctxt, plugins){
 
 	// parse a data selector and return a function that
 	// can traverse the data accordingly, given a context.
-	function dataselectfn(sel){
+	function dataselectFn(sel){
 		if(typeof(sel) === 'function'){
 			return sel;
 		}
@@ -201,7 +201,7 @@ $p.core = function(sel, ctxt, plugins){
 				while((m = s.match(/#\{([^{}]+)\}/)) !== null){
 					found = true;
 					parts[i++] = s.slice(0, m.index);
-					pfns[i] = dataselectfn(m[1]);
+					pfns[i] = dataselectFn(m[1]);
 					s = s.slice(m.index + m[0].length, s.length);
 				}
 			}
@@ -274,12 +274,12 @@ $p.core = function(sel, ctxt, plugins){
 				error('cannot append with loop (sel: ' + osel + ')');
 			}
 		}
-		var setstr, getstr, quotefn, isStyle, isClass, attName, setfn;
+		var setStr, getStr, quoteFn, isStyle, isClass, attName, setFn;
 		if(attr){
 			isStyle = (/^style$/i).test(attr);
 			isClass = (/^class$/i).test(attr);
 			attName = isClass ? 'className' : attr;
-			setstr = function(node, s) {
+			setStr = function(node, s) {
 				node.setAttribute(attPfx + attr, s);
 				if (attName in node && !isStyle) {
 					try{node[attName] = '';}catch(e){} //FF4 gives an error sometimes
@@ -291,24 +291,24 @@ $p.core = function(sel, ctxt, plugins){
 			};
 			if (isStyle || isClass) {//IE no quotes special care
 				if(isStyle){
-					getstr = function(n){ return n.style.cssText; };
+					getStr = function(n){ return n.style.cssText; };
 				}else{
-					getstr = function(n){ return n.className;	};
+					getStr = function(n){ return n.className; };
 				}
 			}else {
-				getstr = function(n){ return n.getAttribute(attr); };
+				getStr = function(n){ return n.getAttribute(attr); };
 			}
-			quotefn = function(s){ return s.replace(/\"/g, '&quot;'); };
+			quoteFn = function(s){ return s.replace(/\"/g, '&quot;'); };
 			if(prepend){
-				setfn = function(node, s){ setstr( node, s + getstr( node )); };
+				setFn = function(node, s){ setStr( node, s + getStr( node )); };
 			}else if(append){
-				setfn = function(node, s){ setstr( node, getstr( node ) + s); };
+				setFn = function(node, s){ setStr( node, getStr( node ) + s); };
 			}else{
-				setfn = function(node, s){ setstr( node, s ); };
+				setFn = function(node, s){ setStr( node, s ); };
 			}
 		}else{
 			if (isLoop) {
-				setfn = function(node, s) {
+				setFn = function(node, s) {
 					var pn = node.parentNode;
 					if (pn) {
 						//replace node with s
@@ -318,19 +318,19 @@ $p.core = function(sel, ctxt, plugins){
 				};
 			} else {
 				if (prepend) {
-					setfn = function(node, s) { node.insertBefore(document.createTextNode(s), node.firstChild);	};
+					setFn = function(node, s) { node.insertBefore(document.createTextNode(s), node.firstChild); };
 				} else if (append) {
-					setfn = function(node, s) { node.appendChild(document.createTextNode(s));};
+					setFn = function(node, s) { node.appendChild(document.createTextNode(s));};
 				} else {
-					setfn = function(node, s) {
+					setFn = function(node, s) {
 						while (node.firstChild) { node.removeChild(node.firstChild); }
 						node.appendChild(document.createTextNode(s));
 					};
 				}
 			}
-			quotefn = function(s) { return s; };
+			quoteFn = function(s) { return s; };
 		}
-		return { attr: attr, nodes: target, set: setfn, sel: osel, quotefn: quotefn };
+		return { attr: attr, nodes: target, set: setFn, sel: osel, quoteFn: quoteFn };
 	}
 
 	function setSig(target, n){
@@ -342,7 +342,7 @@ $p.core = function(sel, ctxt, plugins){
 	}
 
 	// read de loop data, and pass it to the inner rendering function
-	function loopfn(name, dselect, inner, sorter, filter){
+	function loopFn(name, dselect, inner, sorter, filter){
 		return function(ctxt){
 			var a = dselect(ctxt),
 				old = ctxt[name],
@@ -426,15 +426,15 @@ $p.core = function(sel, ctxt, plugins){
 			return loopgen(dom, sel, loop, fns);
 		}
 		var spec = parseloopspec(ls),
-			itersel = dataselectfn(spec.sel),
+			itersel = dataselectFn(spec.sel),
 			target = getTarget(dom, sel, true),
 			nodes = target.nodes;
 
 		for(i = 0; i < nodes.length; i++){
 			var node = nodes[i],
 				inner = compiler(node, dsel);
-			fns[fns.length] = wrapQuote(target.quotefn, loopfn(spec.name, itersel, inner, sorter, filter));
-			target.nodes = [node];		// N.B. side effect on target.
+			fns[fns.length] = wrapQuote(target.quoteFn, loopFn(spec.name, itersel, inner, sorter, filter));
+			target.nodes = [node];	// N.B. side effect on target.
 			setSig(target, fns.length - 1);
 		}
 		return target;
@@ -494,7 +494,7 @@ $p.core = function(sel, ctxt, plugins){
 			}
 			// not found check first level of data
 			if(typeof val === 'undefined'){
-				val = dataselectfn(cspec.prop)(isArray(data) ? data[0] : data);
+				val = dataselectFn(cspec.prop)(isArray(data) ? data[0] : data);
 				// nothing found return
 				if(val === ''){
 					return false;
@@ -531,16 +531,16 @@ $p.core = function(sel, ctxt, plugins){
 					// if the target is a value
 					target = getTarget(n, cspec, false);
 					setSig(target, fns.length);
-					fns[fns.length] = wrapQuote(target.quotefn, dataselectfn(cspec.prop));
+					fns[fns.length] = wrapQuote(target.quoteFn, dataselectFn(cspec.prop));
 				}else{
 					// if the target is a loop
-					itersel = dataselectfn(cspec.sel);
+					itersel = dataselectFn(cspec.sel);
 					target = getTarget(n, cspec, true);
 					nodes = target.nodes;
 					for(j = 0, jj = nodes.length; j < jj; j++){
 						node = nodes[j];
 						inner = compiler(node, false, data, ans);
-						fns[fns.length] = wrapQuote(target.quotefn, loopfn(cspec.sel, itersel, inner));
+						fns[fns.length] = wrapQuote(target.quoteFn, loopFn(cspec.sel, itersel, inner));
 						target.nodes = [node];
 						setSig(target, fns.length - 1);
 					}
@@ -560,7 +560,7 @@ $p.core = function(sel, ctxt, plugins){
 						sel = sels[i];
 						target = getTarget(dom, sel, false);
 						setSig(target, fns.length);
-						fns[fns.length] = wrapQuote(target.quotefn, dataselectfn(dsel));
+						fns[fns.length] = wrapQuote(target.quoteFn, dataselectFn(dsel));
 					}else{
 						// loop on node
 						loopgen(dom, sel, dsel, fns);
