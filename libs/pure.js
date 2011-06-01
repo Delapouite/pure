@@ -283,16 +283,13 @@ $p.core = function(sel, ctxt, plugins){
 					isClass && node.removeAttribute(attName);
 				}
 			};
-			if (isStyle || isClass) {//IE no quotes special care
-				if(isStyle){
-					getStr = function(n){ return n.style.cssText; };
-				}else{
-					getStr = function(n){ return n.className; };
-				}
+			if(isStyle){
+				getStr = function(n){ return n.style.cssText; };
+			}else if (isClass){
+				getStr = function(n){ return n.className; };
 			}else {
 				getStr = function(n){ return n.getAttribute(attr); };
 			}
-			quoteFn = function(s){ return s.replace(/\"/g, '&quot;'); };
 			if(prepend){
 				setFn = function(node, s){ setStr(node, s + getStr(node)); };
 			}else if(append){
@@ -300,6 +297,7 @@ $p.core = function(sel, ctxt, plugins){
 			}else{
 				setFn = function(node, s){ setStr(node, s); };
 			}
+			quoteFn = function(s){ return s.replace(/\"/g, '&quot;'); };
 		}else{
 			if (isLoop) {
 				setFn = function(node, s) {
