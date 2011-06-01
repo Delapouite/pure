@@ -183,7 +183,7 @@ $p.core = function(sel, ctxt, plugins){
 	// parse a data selector and return a function that
 	// can traverse the data accordingly, given a context.
 	function dataselectFn(sel){
-		if(typeof(sel) === 'function'){
+		if(typeof sel === 'function'){
 			return sel;
 		}
 		//check for a valid js variable name with hyphen(for properties only), $, _ and :
@@ -420,7 +420,7 @@ $p.core = function(sel, ctxt, plugins){
 		}
 		var dsel = loop[ls];
 		// if it's a simple data selector then we default to contents, not replacement.
-		if(typeof(dsel) === 'string' || typeof(dsel) === 'function'){
+		if(typeof dsel === 'string' || typeof dsel === 'function'){
 			loop = {};
 			loop[ls] = {root: dsel};
 			return loopgen(dom, sel, loop, fns);
@@ -555,7 +555,7 @@ $p.core = function(sel, ctxt, plugins){
 				sels = sel.split(/\s*,\s*/); //allow selector separation by quotes
 				sl = sels.length;
 				do{
-					if(typeof(dsel) === 'function' || typeof(dsel) === 'string'){
+					if(typeof dsel  === 'function' || typeof dsel === 'string'){
 						// set the value for the node/attr
 						sel = sels[i];
 						target = getTarget(dom, sel, false);
@@ -597,7 +597,7 @@ $p.core = function(sel, ctxt, plugins){
 			return rfn({context:context});
 		};
 	}
-	//compile with the directive as argument
+	// compile with the directive as argument
 	// run the template function on the context argument
 	// return an HTML string
 	// should replace the template and return this
