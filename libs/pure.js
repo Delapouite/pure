@@ -442,19 +442,19 @@ $p.core = function(sel, ctxt, plugins){
 
 	function getAutoNodes(n, data){
 		var ns = n.getElementsByTagName('*'),
-			an = [],
+			autoNodes = [],
 			openLoops = {a:[],l:{}},
 			cspec,
 			isNodeValue,
 			i, ii, j, jj, ni, cs, cj;
 		//for each node found in the template
 		for(i = -1, ii = ns.length; i < ii; i++){
-			ni = i > -1 ?ns[i]:n;
+			ni = i > -1 ? ns[i] : n;
 			if(ni.nodeType === 1 && ni.className !== ''){
 				//when a className is found
 				cs = ni.className.split(' ');
 				// for each className
-				for(j = 0, jj=cs.length;j<jj;j++){
+				for(j = 0, jj = cs.length; j < jj; j++){
 					cj = cs[j];
 					// check if it is related to a context property
 					cspec = checkClass(cj, ni.tagName);
@@ -467,7 +467,7 @@ $p.core = function(sel, ctxt, plugins){
 								cspec.attr = false;
 							}
 						}
-						an.push({n:ni, cspec:cspec});
+						autoNodes.push({n:ni, cspec:cspec});
 					}
 				}
 			}
@@ -511,22 +511,21 @@ $p.core = function(sel, ctxt, plugins){
 			return cspec;
 		}
 
-		return an;
+		return autoNodes;
 
 	}
 
 	// returns a function that, given a context argument,
 	// will render the template defined by dom and directive.
-	function compiler(dom, directive, data, ans){
+	function compiler(dom, directive, data, autoNodes){
 		var fns = [], j, jj, cspec, n, target, nodes, itersel, node, inner, dsel, sels, sel, sl, i, h, parts,  pfns = [], p;
-		// autoRendering nodes parsing -> auto-nodes
-		ans = ans || data && getAutoNodes(dom, data);
+		// autoRendering nodes parsing -> autoNodes
+		autoNodes = autoNodes || data && getAutoNodes(dom, data);
 		if(data){
-			// for each auto-nodes
-			while(ans.length > 0){
-				cspec = ans[0].cspec;
-				n = ans[0].n;
-				ans.splice(0, 1);
+			while(autoNodes.length > 0){
+				cspec = autoNodes[0].cspec;
+				n = autoNodes[0].n;
+				autoNodes.splice(0, 1);
 				if(cspec.t === 'str'){
 					// if the target is a value
 					target = getTarget(n, cspec, false);
@@ -539,7 +538,7 @@ $p.core = function(sel, ctxt, plugins){
 					nodes = target.nodes;
 					for(j = 0, jj = nodes.length; j < jj; j++){
 						node = nodes[j];
-						inner = compiler(node, false, data, ans);
+						inner = compiler(node, false, data, autoNodes);
 						fns[fns.length] = wrapQuote(target.quoteFn, loopFn(cspec.sel, itersel, inner));
 						target.nodes = [node];
 						setSig(target, fns.length - 1);
