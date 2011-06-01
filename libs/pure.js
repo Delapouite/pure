@@ -602,8 +602,8 @@ $p.core = function(sel, ctxt, plugins){
 	// return an HTML string
 	// should replace the template and return this
 	function render(ctxt, directive){
-		var fn = typeof directive === 'function' && directive, i = 0, ii = this.length;
-		for(; i < ii; i++){
+		var fn = typeof directive === 'function' && directive;
+		for(var i = 0, ii = this.length; i < ii; i++){
 			this[i] = replaceWith( this[i], (fn || plugins.compile( directive, false, this[i] ))( ctxt, false ));
 		}
 		context = null;
